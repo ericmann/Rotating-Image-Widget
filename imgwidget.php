@@ -31,9 +31,8 @@ License: GPLv2+
  */
 if( ! defined( 'RIW_DIRECTORY' )) define( 'RIW_DIRECTORY', dirname(__FILE__) );
 if( ! defined( 'RIW_INC_DIRECTORY' )) define( 'RIW_INC_DIRECTORY', RIW_DIRECTORY . '/includes');
-if( ! defined( 'RIW_URI' )) define( 'RIW_URI', get_bloginfo('url') . '/wp-content/plugins/rotating-image-widget' );
+if( ! defined( 'RIW_URI' )) define( 'RIW_URI', plugins_url( '', __FILE__ ) );
 if( ! defined( 'RIW_INC_URI' )) define( 'RIW_INC_URI', RIW_URI . '/includes');
-
 
 /**
  * Sets admin warnings regarding required PHP and WordPress versions.
