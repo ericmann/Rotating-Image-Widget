@@ -87,7 +87,12 @@ function get_images($height, $width, $count, $order) {
 
 // Hooks and such //
 add_action('widgets_init', create_function('', 'return register_widget("RIW_Widget");'));
-wp_enqueue_style( 'riw-override-css', RIW_INC_URI . '/riw.css', '', '1.0', 'screen' );
-wp_enqueue_script( 'jquery' );
-wp_enqueue_script( 'riw-javascript', RIW_INC_URI . '/riw.js', 'jquery', '1.0', true);
+
+add_action( 'wp_enqueue_scripts', 'riw_enqueue_scripts' );
+
+function riw_enqueue_scripts() {
+	wp_enqueue_style( 'riw-override-css', RIW_INC_URI . '/riw.css', '', '1.0', 'screen' );
+	wp_enqueue_script( 'jquery' );
+	wp_enqueue_script( 'riw-javascript', RIW_INC_URI . '/riw.js', 'jquery', '1.0', true);	
+}
 ?>
