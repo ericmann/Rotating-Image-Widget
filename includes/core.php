@@ -15,7 +15,8 @@ class RIW_Widget extends WP_Widget {
 				'title' => '',
 				'count' => '',
 				'width' => '',
-				'height' => ''
+				'height' => '',
+				'post_ids' => ''
 			)
 		);
 
@@ -23,6 +24,7 @@ class RIW_Widget extends WP_Widget {
 		$count = esc_attr( $instance['count'] );
 		$width = esc_attr( $instance['width'] );
 		$height = esc_attr( $instance['height'] );
+		$post_ids = esc_attr( $instance['post_ids'] );
 		
 		?>
 		<p>
@@ -41,6 +43,10 @@ class RIW_Widget extends WP_Widget {
 			<label for="<?php echo $this->get_field_id('height'); ?>"><?php _e('Gallery Height (in pixels):'); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('height'); ?>" name="<?php echo $this->get_field_name('height'); ?>" type="text" value="<?php echo $height; ?>" />
 		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id('post_ids'); ?>"><?php _e('Post IDs to Fetch From (optional):'); ?></label>
+			<input class="widefat" id="<?php echo $this->get_field_id('post_ids'); ?>" name="<?php echo $this->get_field_name('post_ids'); ?>" type="text" value="<?php echo $post_ids; ?>" />
+		</p>
 		<?php
 	}
 
@@ -55,6 +61,7 @@ class RIW_Widget extends WP_Widget {
 		$count = apply_filters('riw_image_count', empty( $instance['count'] ) ? __( '5' ) : $instance['count']);
 		$width = apply_filters('riw_width', empty( $instance['width'] ) ? __( '150' ) : $instance['width']);
 		$height = apply_filters('riw_height', empty( $instance['height'] ) ? __( '150' ) : $instance['height']);
+		$post_ids = apply_filters('riw_post_ids', empty( $instance['post_ids'] ) ? '' : $instance['post_ids']);
 		$order = apply_filters('riw_order', empty( $instance['order'] ) ? 'RAND()' : $instance['order']);
 		
 		echo $before_widget;
@@ -62,7 +69,7 @@ class RIW_Widget extends WP_Widget {
 		
 		<div class="riw-widget" style="height:<?php echo $height; ?>px;width:<?php echo $width; ?>px;">
 			<div id="riw_images" style="height:<?php echo $height; ?>px;">
-			<?php get_images($height, $width, $count, $order); ?>
+			<?php get_images($height, $width, $count, $order, $post_ids); ?>
 			</div>
 		</div>	<?php
 		
@@ -70,18 +77,27 @@ class RIW_Widget extends WP_Widget {
 	}
 }
 
-function get_images($height, $width, $count, $order) {
+function get_images($height, $width, $count, $order, $post_ids) {
 	global $wpdb;		
 	
 	$query_args = array(
 			'post_type' => 'attachment',
+			'post_mime_type' => 'image',
 			'post_status' => 'inherit',
 			'fields' => 'ids',
 			'posts_per_page' => $count,
 			'orderby' => 'rand'
 	);
 
+	if( ! empty( $post_ids ) && preg_match_all( '/^[\d,]+$/' , $post_ids, $matches ) ) {
+		$post_parents = explode( ',' , $post_ids );
+		if( empty( $post_parents[count($post_parents)-1] ) ) array_pop( $post_parents );	
+
+		$query_args['post_parent__in'] = $post_parents;
+	}
+
 	$query_args = apply_filters('riw_attachment_query_args', $query_args);
+	
 	$myimages = new WP_Query( $query_args );
 	
 	$i=0;
