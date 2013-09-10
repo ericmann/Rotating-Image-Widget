@@ -73,12 +73,20 @@ class RIW_Widget extends WP_Widget {
 function get_images($height, $width, $count, $order) {
 	global $wpdb;		
 	
-	$query = "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND post_mime_type LIKE 'image%' ORDER BY " . $order . " LIMIT " . $count;
+	$query_args = array(
+			'post_type' => 'attachment',
+			'post_status' => 'inherit',
+			'fields' => 'ids',
+			'posts_per_page' => $count,
+			'orderby' => 'rand'
+	);
+
+	$query_args = apply_filters('riw_attachment_query_args', $query_args);
+	$myimages = new WP_Query( $query_args );
 	
-	$myimages = $wpdb->get_results( $query );
 	$i=0;
-	foreach($myimages as $image) {
-		$filename = wp_get_attachment_image_src($image->ID, 'large');
+	foreach($myimages->posts as $image_id) {
+		$filename = wp_get_attachment_image_src($image_id, 'large');
 		($i==0) ? $class=' class="active"' : $class='';
 		echo '<div style="width:' . $width . 'px;"' . $class . '><img alt="rotating image" src="' . RIW_INC_URI . '/genImage.php?height=' . $height . '&amp;width=' . $width . '&amp;ctype=image/jpeg&amp;src=' . $filename[0] . '" /></div>';
 		$i+=1;
